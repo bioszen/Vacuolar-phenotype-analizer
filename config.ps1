@@ -6,8 +6,13 @@ Set-Location -Path $Repo
 
 $Python = "python"
 
-$Model = Join-Path $Repo "models\Model.keras"
-$ClassMap = Join-Path $Repo "models\Model_class_map.csv"
+$DefaultModel = Join-Path $Repo "models\Model.keras"
+$FallbackModel = Join-Path $Repo "Model.keras"
+$Model = if (Test-Path $DefaultModel) { $DefaultModel } else { $FallbackModel }
+
+$DefaultClassMap = Join-Path $Repo "models\Model_class_map.csv"
+$FallbackClassMap = Join-Path $Repo "Model_class_map.csv"
+$ClassMap = if (Test-Path $DefaultClassMap) { $DefaultClassMap } else { $FallbackClassMap }
 $OutDir = Join-Path $Repo "outputs"
 
 $Pipeline = Join-Path $Repo "vacuolar_pipeline.py"
@@ -32,6 +37,10 @@ if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir | Out
 $ExpectedClassMap = [System.IO.Path]::ChangeExtension($Model, $null) + "_class_map.csv"
 if ((Test-Path $ClassMap) -and ($ClassMap -ne $ExpectedClassMap) -and (-not (Test-Path $ExpectedClassMap))) {
   Copy-Item $ClassMap $ExpectedClassMap -Force
+}
+
+if (-not (Test-Path $Model)) {
+  throw "Missing model file: $Model"
 }
 
 if (Test-Path $InputsParams) {

@@ -26,6 +26,7 @@ import subprocess
 import sys
 from pathlib import Path
 import re
+import zipfile
 
 import numpy as np
 import pandas as pd
@@ -39,6 +40,42 @@ def _sanitize_path_str(s: str) -> str:
     # Strip embedded newlines and trim surrounding whitespace
     s2 = s.replace("\r", "").replace("\n", "").strip()
     return s2
+
+
+def _read_keras_version(model_path: str) -> str | None:
+    if not str(model_path).lower().endswith(".keras"):
+        return None
+    try:
+        with zipfile.ZipFile(model_path, "r") as zf:
+            if "metadata.json" not in zf.namelist():
+                return None
+            meta = json.loads(zf.read("metadata.json").decode("utf-8"))
+            return str(meta.get("keras_version") or "").strip() or None
+    except Exception:
+        return None
+
+
+def _runtime_keras_version() -> str | None:
+    try:
+        import keras  # type: ignore
+
+        return str(getattr(keras, "__version__", "")).strip() or None
+    except Exception:
+        return str(getattr(tf.keras, "__version__", "")).strip() or None
+
+
+def _check_keras_compat(model_path: str) -> None:
+    model_ver = _read_keras_version(model_path)
+    runtime_ver = _runtime_keras_version()
+    if not model_ver or not runtime_ver:
+        return
+    if model_ver.split(".")[0] != runtime_ver.split(".")[0]:
+        raise SystemExit(
+            "Keras version mismatch: model saved with Keras "
+            f"{model_ver}, runtime is {runtime_ver}. "
+            "Use a Keras 3.x environment (tensorflow>=2.16) or re-save the model "
+            "in a compatible format."
+        )
 
 
 def load_class_map(model_path: str):
@@ -59,6 +96,7 @@ def load_class_map(model_path: str):
 def load_model(model_path: str):
     # Model was trained with preprocess_input (EfficientNetV2); register it as custom_objects.
     custom = {"preprocess_input": tf.keras.applications.efficientnet_v2.preprocess_input}
+    _check_keras_compat(model_path)
     model = tf.keras.models.load_model(model_path, compile=False, safe_mode=False, custom_objects=custom)
     return model
 

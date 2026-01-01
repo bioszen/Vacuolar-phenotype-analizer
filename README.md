@@ -26,6 +26,11 @@ Seeley, E. S., Kato, M., Margolis, N., Wickner, W., & Eitzen, G. (2002). Genomic
 Training environment: TensorFlow 2.16.1 / Keras 3.0.5.
 Inference environment: TensorFlow 2.15.0 / Keras 2.15.0.
 
+### Model file compatibility
+The provided `Model.keras` was saved with Keras 3.x. It cannot be loaded by Keras 2.x (e.g., TensorFlow/Keras 2.15), and will raise a version mismatch error. For inference with `Model.keras`, use a Keras 3 environment (TensorFlow >= 2.16).
+
+If you must use Keras 2.15 for inference, re-save the model from a Keras 3 environment into a legacy format (e.g., `Model.h5`) and point the pipeline to that file instead.
+
 ## Environment and dependencies
 Commands are intended to be run in Windows PowerShell (5.1 or 7) from a Python virtual environment.
 
