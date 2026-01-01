@@ -2,8 +2,8 @@
 Automated quantification of vacuolar phenotypes (A/B/C) in yeast from confocal FM4-64 images.
 
 ## Contents
-- `apply_filter.py`: Runs inference on LIF files with confidence filtering and writes a per-image CSV (raw + filtered counts).
 - `vacuolar_pipeline.py`: End-to-end pipeline to extract crops, train a classifier, and apply it to LIF or OME-TIFF/TIFF images.
+- `apply_filter.py`: Runs inference on LIF files with confidence filtering and writes a per-image CSV (raw + filtered counts).
 - `Model.keras`: Trained CNN classifier exported as a Keras model.
 - `Model_class_map.csv`: Label mapping for the model.
 - `config.ps1`: Template PowerShell config to rerun the analysis with consistent paths and parameters.
