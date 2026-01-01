@@ -12,16 +12,16 @@ Automated quantification of vacuolar phenotypes (A/B/C) in yeast from confocal F
 - `inputs_params.txt`: Optional parameters (min_conf/min_margin, etc.) for config.ps1.
 
 ## Model generation (training)
-A total of 2321 single-cell yeast crops were manually labeled (A/B/C) from confocal FM4-64 z-stacks (OME-TIFF/LIF). FM4-64 is a lipophilic dye that labels vacuolar membranes (excitation/emission: 515-640 nm). Samples covered multiple conditions, including U18 treatment that increased vacuolar fragmentation and ensured representation of all three phenotypes in the labeled pool. Z-stacks were converted to 2D by maximum-intensity projection along z. Candidate cells were detected using a blob-based detector with fixed parameters (crop size: 96x96 px; threshold: 0.06; sigma_min: 3; sigma_max: 12). The final model was trained on 900 crops selected from the labeled pool using a cap_max sampling strategy (seed=42), which yielded the best validation performance. Crops were classified into vacuolar phenotypes A/B/C with a convolutional neural network (CNN) and exported as a Keras `.keras` model.
+A total of 2,321 single-yeast-cell image crops were manually labeled as A/B/C from confocal FM4-64 z-stacks (OME-TIFF/LIF). FM4-64 is a lipophilic dye that labels vacuolar membranes (excitation/emission: 515–640 nm). Samples covered multiple conditions and were selected to ensure representation of all three phenotypes within the labeled pool. Z-stacks were converted to 2D images by maximum-intensity projection along the z-axis. Candidate cells were detected using a blob-based detector with fixed parameters (crop size: 96 × 96 px; threshold: 0.06; sigma_min: 3; sigma_max: 12). The final model was trained on 900 crops selected from the labeled pool using a cap_max sampling strategy (seed = 42), which yielded the best validation performance. Crops were classified into vacuolar phenotypes A/B/C using a convolutional neural network (CNN), and the trained model was exported as a Keras .keras file.
 
 ## Vacuolar phenotype definitions (A/B/C)
-Reference for A/B/C phenotypes and morphology:
-Seeley, E. S., Kato, M., Margolis, N., Wickner, W., & Eitzen, G. (2002). Genomic analysis of homotypic vacuole fusion. Molecular Biology of the Cell, 13(3), 782–794. https://doi.org/10.1091/mbc.01-10-0512
 
 Summary used for labeling:
 - Phenotype A: lowest vacuolar fragmentation; typical in normal conditions; cells with up to 2 vacuoles.
 - Phenotype B: 3 or more clearly identifiable vacuoles.
 - Phenotype C: highly fragmented vacuoles that are difficult to quantify by number.
+
+Seeley, E. S., Kato, M., Margolis, N., Wickner, W., & Eitzen, G. (2002). Genomic analysis of homotypic vacuole fusion. Molecular Biology of the Cell, 13(3), 782–794. https://doi.org/10.1091/mbc.01-10-0512
 
 Training environment: TensorFlow 2.16.1 / Keras 3.0.5.
 Inference environment: TensorFlow 2.15.0 / Keras 2.15.0.
