@@ -1,0 +1,12 @@
+# Optional parameters (key=value). Lines starting with # are ignored.
+# min_conf and min_margin control confidence filtering in apply_filter.py.
+min_conf=0.60
+min_margin=0.10
+# disable_filter=true
+
+# Optional overrides:
+# crop_size=96
+# threshold=0.06
+# sigma_min=3
+# sigma_max=12
+# batch_size=128

@@ -1,0 +1,3 @@
+# Single folder path for OME-TIFF/TIFF inputs.
+# Relative paths are resolved from the repo root.
+data\ome_tif
