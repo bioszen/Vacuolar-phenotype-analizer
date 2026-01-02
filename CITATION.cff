@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this model or code, please cite this work."
+title: "Vacuolar Phenotype Analyzer: Trained Model and Analysis Pipeline"
+type: software
+authors:
+  - family-names: "Szenfeld"
+    given-names: "Benjamín"
+    orcid: "https://orcid.org/0009-0003-4702-4149"
+license: "CC-BY-SA-4.0"
+version: "1.0.0"
+repository-code: "https://github.com/bioszen/Vacuolar-phenotype-analizer"
+url: "https://github.com/bioszen/Vacuolar-phenotype-analizer"

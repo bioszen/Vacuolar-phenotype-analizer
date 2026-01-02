@@ -73,6 +73,7 @@ Windows vs macOS differences:
 - macOS venv activation: `source .venv/bin/activate`
 - Path separators: Windows `C:\path\to\file` vs macOS `/path/to/file`
 
+
 ## Apply the model
 
 ### LIF with confidence filtering (apply_filter.py)
