@@ -29,6 +29,13 @@ Inference environment: TensorFlow 2.15.0 / Keras 2.15.0.
 ### Model file compatibility
 The provided `Model.keras` was saved with Keras 3.x. It cannot be loaded by Keras 2.x (e.g., TensorFlow/Keras 2.15), and will raise a version mismatch error. For inference with `Model.keras`, use a Keras 3 environment (TensorFlow >= 2.16).
 
+Recommended Keras 3 setup (tested with Keras 3.13.0 / TensorFlow 2.16.1):
+```powershell
+python -m venv .venv-keras3
+. .\.venv-keras3\Scripts\Activate.ps1
+pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image readlif pillow
+```
+
 If you must use Keras 2.15 for inference, re-save the model from a Keras 3 environment into a legacy format (e.g., `Model.h5`) and point the pipeline to that file instead.
 
 ## Environment and dependencies
