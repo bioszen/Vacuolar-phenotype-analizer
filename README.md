@@ -167,3 +167,11 @@ outputs/
 - `min_conf`: Minimum softmax probability for the top-1 class. Crops below this value are excluded from the filtered counts.
 - `min_margin`: Minimum gap between the top-1 and top-2 probabilities. This removes ambiguous crops where the model is not clearly confident.
 - Use `--disable_filter` to keep all detected crops (filtered columns equal raw columns).
+
+
+## Citation
+
+If you use this software, please cite:
+
+Szenfeld, B. (2025). *Vacuolar Phenotype Analyzer*. Zenodo.  
+DOI: https://doi.org/10.5281/zenodo.18124375
