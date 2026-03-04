@@ -1,4 +1,14 @@
 # Vacuolar phenotype analyzer
+
+<style>
+  @media print {
+    h1, h2, h3, h4, h5 { page-break-after: avoid; page-break-inside: avoid; }
+    p, li, blockquote { page-break-inside: avoid; }
+    pre, code { page-break-inside: avoid; }
+    @page { margin: 2cm; size: auto; }
+  }
+</style>
+
 Automated quantification of vacuolar phenotypes (A/B/C) in yeast from confocal FM4-64 images.
 
 ## Contents
@@ -24,7 +34,7 @@ Summary used for labeling:
 Seeley, E. S., Kato, M., Margolis, N., Wickner, W., & Eitzen, G. (2002). Genomic analysis of homotypic vacuole fusion. Molecular Biology of the Cell, 13(3), 782–794. https://doi.org/10.1091/mbc.01-10-0512
 
 Training environment: TensorFlow 2.16.1 / Keras 3.0.5.
-Inference environment: TensorFlow 2.15.0 / Keras 2.15.0.
+Original inference environment during development: TensorFlow 2.15.0 / Keras 2.15.0 (legacy model format).
 
 ### Model file compatibility
 The provided `Model.keras` was saved with Keras 3.x. It cannot be loaded by Keras 2.x (e.g., TensorFlow/Keras 2.15), and will raise a version mismatch error. For inference with `Model.keras`, use a Keras 3 environment (TensorFlow >= 2.16).
@@ -38,17 +48,78 @@ pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image 
 
 If you must use Keras 2.15 for inference, re-save the model from a Keras 3 environment into a legacy format (e.g., `Model.h5`) and point the pipeline to that file instead.
 
+## Quick start (Windows PowerShell, from zero)
+Use these steps if this is your first time running the model.
+
+> **Note**: Directory paths in the commands below (such as `D:\Vacuolar-phenotype-analizer` or `C:\vacuolar\...`) are reference examples. You must replace them with the actual paths to your working directory where you downloaded the repository and where your files are located to run them successfully.
+
+1) Install Python (if needed)
+```powershell
+python --version
+```
+If `python` is not recognized:
+```powershell
+winget install -e --id Python.Python.3.11
+```
+Then close and reopen PowerShell.
+
+If venv activation is blocked, run once:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+2) Open PowerShell in this repository
+```powershell
+Set-Location "D:\Vacuolar-phenotype-analizer"
+```
+
+3) Create and activate a virtual environment (recommended for `Model.keras`)
+```powershell
+python -m venv .venv-keras3
+. .\.venv-keras3\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image readlif pillow
+```
+
+4) Confirm packages were installed in the active environment
+```powershell
+python -c "import tensorflow, keras; print('tensorflow', tensorflow.__version__, '| keras', keras.__version__)"
+```
+
+5) Set your input files
+- Edit `inputs_lif.txt` with one `.lif` path per line (specify the exact directory path where your `.lif` files are located).
+- Optional: edit `inputs_params.txt` to change `min_conf`, `min_margin`, or set `disable_filter=true`.
+
+6) Run the analysis
+- If the environment is already active:
+```powershell
+.\config.ps1
+```
+- If the environment is not active, run everything in one line:
+```powershell
+Set-Location "D:\Vacuolar-phenotype-analizer"; . .\.venv-keras3\Scripts\Activate.ps1; .\config.ps1
+```
+
+Outputs are written to `outputs\`.
+
 ## Environment and dependencies
 Commands are intended to be run in Windows PowerShell (5.1 or 7) from a Python virtual environment.
 
 Dependencies:
 - Python 3.x
-- `tensorflow` (2.15.0 for inference; 2.16.1 for training)
+- `tensorflow` (2.16.1 recommended for `Model.keras`; 2.15.0 only for legacy models such as `.h5`)
 - `numpy`, `pandas`
 - `tifffile`, `scikit-image`
 - `readlif`, `pillow` (only for `.lif`)
 
-Example setup for inference:
+Example setup for inference with the provided `Model.keras`:
+```powershell
+python -m venv .venv-keras3
+. .\.venv-keras3\Scripts\Activate.ps1
+pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image readlif pillow
+```
+
+Legacy setup (only if you converted the model to a Keras 2-compatible format, such as `.h5`):
 ```powershell
 python -m venv .venv
 . .\.venv\Scripts\Activate.ps1
@@ -62,7 +133,7 @@ You can run the same Python commands in macOS. There are two options:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install tensorflow==2.15.0 numpy pandas tifffile scikit-image readlif pillow
+pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image readlif pillow
 pwsh ./config.ps1
 ```
 
@@ -114,7 +185,7 @@ To disable filtering and keep raw counts only, add `--disable_filter`. When this
 When using `config.ps1`, set `disable_filter=true` in `inputs_params.txt` instead.
 
 Dependencies (Python) for this step:
-- `tensorflow==2.15.0`, `numpy`, `pandas`, `tifffile`, `scikit-image`, `readlif`, `pillow`
+- `tensorflow>=2.16`, `keras>=3`, `numpy`, `pandas`, `tifffile`, `scikit-image`, `readlif`, `pillow` (for `Model.keras`)
 
 ### OME-TIFF/TIFF folder (or a single OME-TIFF)
 `vacuolar_pipeline.py apply` processes all `.tif/.tiff/.ome.tif/.ome.tiff` files in a directory. For a single image, put the file in its own folder and point `--images_dir` to that folder.
@@ -131,7 +202,7 @@ python "C:\vacuolar\vacuolar_pipeline.py" apply `
 This command already outputs raw counts; there is no confidence filtering or `--disable_filter` option here.
 
 Dependencies (Python) for this step:
-- `tensorflow==2.15.0`, `numpy`, `pandas`, `tifffile`, `scikit-image`
+- `tensorflow>=2.16`, `keras>=3`, `numpy`, `pandas`, `tifffile`, `scikit-image` (for `Model.keras`)
 
 ### Notes on inputs
 - Z-stacks are converted to 2D by maximum-intensity projection.
@@ -142,8 +213,15 @@ Edit `inputs_lif.txt` (and optionally `inputs_ome_dir.txt`) to set your input pa
 To change `min_conf` and `min_margin` without editing the script, edit `inputs_params.txt`.
 Relative paths in those files are resolved from the repository root.
 
+Note: the script name is `config.ps1`.
+
 ```powershell
 .\config.ps1
+```
+
+If your virtual environment is not active, use:
+```powershell
+Set-Location "D:\Vacuolar-phenotype-analizer"; . .\.venv-keras3\Scripts\Activate.ps1; .\config.ps1
 ```
 
 ## Example dataset layout
@@ -168,6 +246,103 @@ outputs/
 - `min_margin`: Minimum gap between the top-1 and top-2 probabilities. This removes ambiguous crops where the model is not clearly confident.
 - Use `--disable_filter` to keep all detected crops (filtered columns equal raw columns).
 
+## Common errors and quick fixes
+- `python` is not recognized:
+  Install Python and reopen PowerShell.
+  ```powershell
+  winget install -e --id Python.Python.3.11
+  ```
+
+- Activation blocked (`running scripts is disabled on this system`):
+  Allow local scripts for your user, then activate again.
+  ```powershell
+  Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+  . .\.venv-keras3\Scripts\Activate.ps1
+  ```
+
+- `ModuleNotFoundError` or missing packages:
+  You are likely outside the virtual environment, or packages were installed globally instead of inside the environment.
+  ```powershell
+  . .\.venv-keras3\Scripts\Activate.ps1
+  python -m pip install --upgrade pip
+  pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image readlif pillow
+  ```
+
+- Keras/TensorFlow version mismatch when loading `Model.keras`:
+  The provided model requires Keras 3. Use TensorFlow >= 2.16 and Keras >= 3.
+  ```powershell
+  python -c "import tensorflow, keras; print(tensorflow.__version__, keras.__version__)"
+  ```
+  If you must run TensorFlow 2.15/Keras 2.15, convert and use a legacy model format (for example, `Model.h5`).
+
+- `Missing model file` or class map errors:
+  Ensure these files exist and keep standard names:
+  - `models\Model.keras`
+  - `models\Model_class_map.csv`
+
+- `Skipping missing file` warnings from `config.ps1`:
+  One or more paths in `inputs_lif.txt` do not exist. Fix the path(s) and rerun.
+
+- Runtime memory issues (slow or crashes during inference):
+  Reduce `batch_size` in `inputs_params.txt` (for example, `batch_size=32`), then run `config.ps1` again.
+
+- Outputs are not where expected:
+  By default, `config.ps1` writes CSVs to `outputs\` inside the repository root.
+
+## Quick diagnostics (with fixes)
+Run these checks when setup or execution is not working as expected.
+
+1) Check Python is available
+```powershell
+python --version
+```
+- If this fails: install Python and reopen PowerShell.
+  ```powershell
+  winget install -e --id Python.Python.3.11
+  ```
+
+2) Check which Python executable is being used
+```powershell
+where python
+```
+- If the first path is not inside this repo virtual environment (for example, `.venv-keras3\Scripts\python.exe`), activate the environment:
+  ```powershell
+  Set-Location "D:\Vacuolar-phenotype-analizer"
+  . .\.venv-keras3\Scripts\Activate.ps1
+  ```
+
+3) Check pip belongs to the same environment
+```powershell
+pip -V
+```
+- If pip points to global/site packages, reinstall inside the active environment:
+  ```powershell
+  python -m pip install --upgrade pip
+  pip install tensorflow==2.16.1 keras==3.13.0 numpy pandas tifffile scikit-image readlif pillow
+  ```
+
+4) Check TensorFlow/Keras import and versions
+```powershell
+python -c "import tensorflow, keras; print('tensorflow', tensorflow.__version__, '| keras', keras.__version__)"
+```
+- If import fails: reinstall dependencies in the active environment.
+- If versions are below TensorFlow 2.16 / Keras 3: upgrade packages or recreate `.venv-keras3`.
+
+5) Check required files before running
+```powershell
+Test-Path .\config.ps1
+Test-Path .\models\Model.keras
+Test-Path .\models\Model_class_map.csv
+```
+- If any result is `False`, fix file paths or restore missing files.
+
+6) Check inputs list and run
+```powershell
+Get-Content .\inputs_lif.txt
+.\config.ps1
+```
+- If warnings show missing files, correct those paths in `inputs_lif.txt`.
+
 
 ## Citation
 
@@ -175,3 +350,6 @@ If you use this software, please cite:
 
 Szenfeld, B. (2025). *Vacuolar Phenotype Analyzer*. Zenodo.  
 DOI: https://doi.org/10.5281/zenodo.18124375
+
+## Contact
+For any questions or inquiries, you can reach out via email: bioszenf@gmail.com
